@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Actividades</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Actividades cerca de ti!</h1>
+    <nav>
+      <ul>
+        <li><a href="portada.html">Inicio</a></li>
+        <li><a href="agregar.html">Agregar actividad</a></li>
+        <li><a href="estadisticas.html">Estadísticas</a></li>
+      </ul>
+    </nav>
+  </header>
+<body>
+  <h1>Listado de Actividades</h1>
+
+  <table id="tabla-actividades">
+    <thead>
+      <tr>
+        <th>Inicio</th>
+        <th>Término</th>
+        <th>Comuna</th>
+        <th>Sector</th>
+        <th>Tema</th>
+        <th>Nombre</th>
+        <th>Organizador</th>
+        <th>Total Fotos</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <div id="detalle">
+    <h2>Detalle de Actividad</h2>
+    <p id="info"></p>
+    <div id="fotos"></div>
+    <br>
+    <button onclick="volverListado()">Volver al Listado</button>
+  </div>
+
+  <div id="modal">
+    <div style="text-align:center">
+      <img id="imagen-ampliada" src="" alt="Foto ampliada">
+      <br>
+      <button onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <script src="listado.js"></script>
+</body>
+</html>

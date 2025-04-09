@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agregar actividad</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="region_comuna.js"></script>
+  <script defer src="agregar.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Agregar nueva actividad</h1>
+    <nav>
+      <ul>
+        <li><a href="portada.html">Inicio</a></li>
+        <li><a href="listado.html">Ver listado de actividades</a></li>
+        <li><a href="estadisticas.html">Estadísticas</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <form id="actividadForm">
+      <fieldset>
+        <legend>Dónde?</legend>
+        <label for="region">Región: *</label>
+        <select id="region" required>
+          <option value="">Seleccione región</option>
+        </select><br />
+
+        <label for="comuna">Comuna: *</label>
+        <select id="comuna" required>
+          <option value="">Seleccione comuna</option>
+        </select><br />
+
+        <label for="sector">Sector:</label>
+        <input type="text" id="sector" maxlength="100" />
+      </fieldset>
+
+      <fieldset>
+        <legend>¿Quién organiza?</legend>
+        <label for="nombre">Nombre: *</label>
+        <input type="text" id="nombre" required maxlength="200" /><br />
+
+        <label for="email">Email: *</label>
+        <input type="email" id="email" required maxlength="100" /><br />
+
+        <label for="telefono">Número de celular:</label>
+        <input type="tel" id="telefono" pattern="\+\d{3}\.\d{8}" placeholder="+569.12345678" /><br />
+
+        <label for="contacto">Contactar por:</label>
+        <select id="contacto">
+          <option value="">Seleccione una opción</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="telegram">Telegram</option>
+          <option value="x">X</option>
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="otra">Otra</option>
+        </select>
+        <div id="contacto-info-container"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>¿Cuándo y de qué trata?</legend>
+        <label for="inicio">Inicio: *</label>
+        <input type="datetime-local" id="inicio" required /><br />
+
+        <label for="termino">Término:</label>
+        <input type="datetime-local" id="termino" /><br />
+
+        <label for="descripcion">Descripción:</label><br />
+        <textarea id="descripcion" cols="50" rows="10"></textarea><br />
+
+        <label for="tema">Tema: *</label>
+        <select id="tema" required>
+          <option value="">Seleccione tema</option>
+          <option value="música">Música</option>
+          <option value="deporte">Deporte</option>
+          <option value="ciencias">Ciencias</option>
+          <option value="religión">Religión</option>
+          <option value="política">Política</option>
+          <option value="tecnología">Tecnología</option>
+          <option value="juegos">Juegos</option>
+          <option value="baile">Baile</option>
+          <option value="comida">Comida</option>
+          <option value="otro">Otro</option>
+        </select>
+        <div id="otro-tema-container"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Fotos</legend>
+        <div id="foto-container">
+          <input type="file" name="foto" accept="image/*" required />
+        </div>
+        <button type="button" id="agregar-foto">Agregar otra foto</button>
+      </fieldset>
+
+      <button type="submit">Agregar esta actividad</button>
+    </form>
+
+      <div id="confirmacion" style="display: none;">
+        <p>¿Está seguro que desea agregar esta actividad?</p>
+        <button type="button" id="confirmar-si">Sí, estoy seguro</button>
+        <button type="button" id="confirmar-no">No, no estoy seguro, quiero volver al formulario</button>
+      </div>
+  
+      <div id="mensaje-final" style="display: none;">
+        <p>Hemos recibido su información, muchas gracias y suerte en su actividad</p>
+        <a href="portada.html">
+          <button type="button">Volver a la portada</button>
+        </a>
+      </div>
+  </main>
+</body>
+</html>
