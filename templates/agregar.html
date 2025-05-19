@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Agregar actividad{% endblock %}
+
+{% block header %}Agregar nueva actividad{% endblock %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='js/agregar.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+  {% if errores %}
+  <div class="errores">
+    <ul>
+      {% for error in errores %}
+      <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <form id="actividadForm" method="POST" enctype="multipart/form-data">
+    <fieldset>
+      <legend>Dónde?</legend>
+      <label for="region">Región: *</label>
+      <select id="region" name="region" required>
+        <option value="">Seleccione región</option>
+        {% for region in regiones %}
+        <option value="{{ region.id }}">{{ region.nombre }}</option>
+        {% endfor %}
+      </select><br />
+
+      <label for="comuna">Comuna: *</label>
+      <select id="comuna" name="comuna" required>
+        <option value="">Seleccione comuna</option>
+      </select><br />
+
+      <label for="sector">Sector:</label>
+      <input type="text" id="sector" name="sector" maxlength="100" />
+    </fieldset>
+
+    <fieldset>
+      <legend>¿Quién organiza?</legend>
+      <label for="nombre">Nombre: *</label>
+      <input type="text" id="nombre" name="nombre" required maxlength="200" /><br />
+
+      <label for="email">Email: *</label>
+      <input type="email" id="email" name="email" required maxlength="100" /><br />
+
+      <label for="telefono">Número de celular:</label>
+      <input type="tel" id="telefono" name="telefono" pattern="\+\d{3}\.\d{8}" placeholder="+569.12345678" /><br />
+
+      <label for="contacto">Contactar por:</label>
+      <select id="contacto" name="contacto">
+        <option value="">Seleccione una opción</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="telegram">Telegram</option>
+        <option value="X">X</option>
+        <option value="instagram">Instagram</option>
+        <option value="tiktok">TikTok</option>
+        <option value="otra">Otra</option>
+      </select>
+      <div id="contacto-info-container"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>¿Cuándo y de qué trata?</legend>
+      <label for="inicio">Inicio: *</label>
+      <input type="datetime-local" id="inicio" name="inicio" required /><br />
+
+      <label for="termino">Término:</label>
+      <input type="datetime-local" id="termino" name="termino" /><br />
+
+      <label for="descripcion">Descripción:</label><br />
+      <textarea id="descripcion" name="descripcion" cols="50" rows="10"></textarea><br />
+
+      <label for="tema">Tema: *</label>
+      <select id="tema" name="tema" required>
+        <option value="">Seleccione tema</option>
+        <option value="música">Música</option>
+        <option value="deporte">Deporte</option>
+        <option value="ciencias">Ciencias</option>
+        <option value="religión">Religión</option>
+        <option value="política">Política</option>
+        <option value="tecnología">Tecnología</option>
+        <option value="juegos">Juegos</option>
+        <option value="baile">Baile</option>
+        <option value="comida">Comida</option>
+        <option value="otro">Otro</option>
+      </select>
+      <div id="otro-tema-container"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Fotos</legend>
+      <div id="foto-container">
+        <input type="file" name="foto" accept="image/*" required />
+      </div>
+      <button type="button" id="agregar-foto">Agregar otra foto</button>
+    </fieldset>
+
+    <button type="submit">Agregar esta actividad</button>
+  </form>
+
+  <div id="confirmacion" style="display: none;">
+    <p>¿Está seguro que desea agregar esta actividad?</p>
+    <button type="button" id="confirmar-si">Sí, estoy seguro</button>
+    <button type="button" id="confirmar-no">No, no estoy seguro, quiero volver al formulario</button>
+  </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Actividades - Inicio{% endblock %}
+
+{% block content %}
+<section>
+  <h2>Últimas actividades agregadas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Inicio</th>
+        <th>Término</th>
+        <th>Comuna</th>
+        <th>Sector</th>
+        <th>Tema</th>
+        <th>Foto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for actividad in actividades %}
+      <tr>
+        <td>{{ actividad.dia_hora_inicio.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ actividad.dia_hora_termino.strftime('%Y-%m-%d %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
+        <td>{{ actividad.comuna_rel.nombre }}</td>
+        <td>{{ actividad.sector or 'No especificado' }}</td>
+        <td>{{ actividad.temas[0].tema if actividad.temas else 'No especificado' }}</td>
+        <td>
+          {% if actividad.fotos %}
+            <img src="{{ url_for('static', filename=actividad.fotos[0].ruta_archivo.split('/', 1)[1]) }}" alt="{{ actividad.nombre }}" />
+          {% else %}
+            <p>Sin imagen</p>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

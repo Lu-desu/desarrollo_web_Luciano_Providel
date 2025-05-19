@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Listado de Actividades{% endblock %}
+
+{% block header %}Listado de Actividades{% endblock %}
+
+{% block content %}
+<table id="tabla-actividades">
+  <thead>
+    <tr>
+      <th>Inicio</th>
+      <th>Término</th>
+      <th>Comuna</th>
+      <th>Sector</th>
+      <th>Tema</th>
+      <th>Nombre</th>
+      <th>Organizador</th>
+      <th>Total Fotos</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for actividad in actividades %}
+    <tr data-id="{{ actividad.id }}">
+      <td>{{ actividad.dia_hora_inicio.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ actividad.dia_hora_termino.strftime('%Y-%m-%d %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
+      <td>{{ actividad.comuna_rel.nombre }}</td>
+      <td>{{ actividad.sector or 'No especificado' }}</td>
+      <td>{{ actividad.temas[0].tema if actividad.temas else 'No especificado' }}</td>
+      <td>{{ actividad.nombre }}</td>
+      <td>{{ actividad.email }}</td>
+      <td>{{ actividad.fotos|length }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="pagination">
+  {% if pagination.has_prev %}
+    <a href="{{ url_for('listar_actividades', page=pagination.prev_num) }}">Anterior</a>
+  {% else %}
+    <span class="disabled">Anterior</span>
+  {% endif %}
+  
+  <span>Página {{ pagination.page }} de {{ pagination.pages }}</span>
+  
+  {% if pagination.has_next %}
+    <a href="{{ url_for('listar_actividades', page=pagination.next_num) }}">Siguiente</a>
+  {% else %}
+    <span class="disabled">Siguiente</span>
+  {% endif %}
+</div>
+
+<div id="detalle" style="display: none;">
+  <h2>Detalle de Actividad</h2>
+  <p id="info"></p>
+  <div id="fotos"></div>
+  <br>
+  <button onclick="volverListado()">Volver al Listado</button>
+</div>
+
+<div id="modal">
+  <div style="text-align:center">
+    <img id="imagen-ampliada" src="" alt="Foto ampliada">
+    <br>
+    <button onclick="cerrarModal()">Cerrar</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // JavaScript para manejar el detalle de actividades
+  document.addEventListener('DOMContentLoaded', function() {
+    const detalleDiv = document.getElementById('detalle');
+    const tableRows = document.querySelectorAll('#tabla-actividades tbody tr');
+    const infoP = document.getElementById('info');
+    const fotosDiv = document.getElementById('fotos');
+    const modal = document.getElementById('modal');
+    const imgAmpliada = document.getElementById('imagen-ampliada');
+    
+    tableRows.forEach(row => {
+      row.addEventListener('click', function() {
+        const actividadId = this.getAttribute('data-id');
+        fetch(`/actividad/${actividadId}`)
+          .then(response => response.json())
+          .then(data => {
+            document.querySelector('table').style.display = 'none';
+            document.querySelector('.pagination').style.display = 'none';
+            detalleDiv.style.display = 'block';
+            
+            infoP.innerHTML = `
+              <strong>Nombre:</strong> ${data.nombre}<br>
+              <strong>Inicio:</strong> ${data.inicio}<br>
+              <strong>Término:</strong> ${data.termino || 'No especificado'}<br>
+              <strong>Comuna:</strong> ${data.comuna}<br>
+              <strong>Sector:</strong> ${data.sector || 'No especificado'}<br>
+              <strong>Tema:</strong> ${data.tema}<br>
+              <strong>Organizador:</strong> ${data.email}<br>
+              <strong>Teléfono:</strong> ${data.celular || 'No especificado'}<br>
+              <strong>Descripción:</strong> ${data.descripcion || 'No especificada'}<br>
+              <strong>Total Fotos:</strong> ${data.fotos.length}<br>
+            `;
+            
+            fotosDiv.innerHTML = '';
+            data.fotos.forEach(foto => {
+              const img = document.createElement('img');
+              img.src = foto.ruta;
+              img.className = 'foto-mini';
+              img.addEventListener('click', () => {
+                imgAmpliada.src = foto.ruta;
+                modal.style.display = 'flex';
+              });
+              fotosDiv.appendChild(img);
+            });
+          });
+      });
+    });
+  });
+  
+  function volverListado() {
+    document.getElementById('detalle').style.display = 'none';
+    document.querySelector('table').style.display = 'table';
+    document.querySelector('.pagination').style.display = 'block';
+  }
+  
+  function cerrarModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+</script>
+{% endblock %}

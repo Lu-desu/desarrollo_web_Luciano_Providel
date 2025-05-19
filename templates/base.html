@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Actividades{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <h1>{% block header %}Actividades cerca de ti!{% endblock %}</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><a href="{{ url_for('agregar_actividad') }}">Agregar actividad</a></li>
+        <li><a href="{{ url_for('listar_actividades') }}">Ver listado de actividades</a></li>
+        <li><a href="#">Estadísticas</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    {% if get_flashed_messages() %}
+      <div class="flash-messages">
+        {% for message in get_flashed_messages() %}
+          <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
