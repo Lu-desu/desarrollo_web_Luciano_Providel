@@ -99,41 +99,6 @@ Se mantienen las validaciones existentes y se agregaron nuevas para comentarios:
    - Texto: obligatorio, mínimo 5 caracteres
    - Actividad válida: verificación de existencia
 
-## API REST:
-
-La aplicación mantiene los endpoints existentes y agrega nuevos para estadísticas y comentarios:
-
-**APIs existentes:**
-- Obtener todas las regiones (`/api/regiones`)
-- Obtener comunas por región (`/api/comunas/<region_id>`)
-- Obtener detalles de una actividad (`/actividad/<id>`)
-
-**Nuevas APIs para estadísticas:**
-- Datos para gráfico de líneas (`/api/estadisticas/actividades-por-dia`)
-- Datos para gráfico de torta (`/api/estadisticas/actividades-por-tipo`)  
-- Datos para gráfico de barras (`/api/estadisticas/actividades-por-mes-horario`)
-
-**Nuevas APIs para comentarios:**
-- Obtener comentarios de una actividad (`/api/comentarios/<actividad_id>`)
-- Agregar nuevo comentario (`/api/comentarios` - POST)
-
-## Base de Datos:
-
-Se agregó la tabla `comentario` con la siguiente estructura:
-- `id`: clave primaria auto-incremental
-- `nombre`: varchar(80) - nombre del comentarista
-- `texto`: varchar(300) - contenido del comentario  
-- `fecha`: timestamp - fecha y hora del comentario
-- `actividad_id`: clave foránea hacia tabla actividad
-
-## Tecnologías Utilizadas:
-
-* **Backend**: Flask, SQLAlchemy, MySQL
-* **Frontend**: HTML5, CSS3, JavaScript (ES6)
-* **Gráficos**: Chart.js 3.9.1 (CDN)
-* **AJAX**: Fetch API para comunicación asíncrona
-* **Validación**: Cliente (JavaScript) y servidor (Flask)
-
 ## Instalación y Configuración:
 
 Para configurar el proyecto, cree un espacio virtual e instale las librerías que ocupe:
