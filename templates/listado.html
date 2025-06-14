@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% block title %}Listado de Actividades{% endblock %}
+
+{% block header %}Listado de Actividades{% endblock %}
+
+{% block head %}
+<style>
+  .comentarios-section {
+    margin-top: 2em;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .comentario-form {
+    margin-bottom: 2em;
+    padding: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+  }
+  
+  .comentario-form h4 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .comentario-form label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+  }
+  
+  .comentario-form input,
+  .comentario-form textarea {
+    width: 100%;
+    margin-bottom: 1em;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+  }
+  
+  .comentario-form button {
+    background-color: #efa6e1;
+    color: white;
+    padding: 0.7em 1.5em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .comentario-form button:hover {
+    background-color: #d68ac6;
+  }
+  
+  .comentario-item {
+    margin-bottom: 1em;
+    padding: 1em;
+    border-left: 4px solid #efa6e1;
+    background-color: white;
+  }
+  
+  .comentario-header {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: #333;
+  }
+  
+  .comentario-fecha {
+    font-size: 0.9em;
+    color: #666;
+  }
+  
+  .comentario-texto {
+    margin-top: 0.5em;
+    line-height: 1.4;
+  }
+  
+  .error-message {
+    color: #d9534f;
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    padding: 0.75em;
+    margin-bottom: 1em;
+    border-radius: 4px;
+  }
+  
+  .success-message {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
+    padding: 0.75em;
+    margin-bottom: 1em;
+    border-radius: 4px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<table id="tabla-actividades">
+  <thead>
+    <tr>
+      <th>Inicio</th>
+      <th>Término</th>
+      <th>Comuna</th>
+      <th>Sector</th>
+      <th>Tema</th>
+      <th>Nombre</th>
+      <th>Organizador</th>
+      <th>Total Fotos</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for actividad in actividades %}
+    <tr data-id="{{ actividad.id }}">
+      <td>{{ actividad.dia_hora_inicio.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ actividad.dia_hora_termino.strftime('%Y-%m-%d %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
+      <td>{{ actividad.comuna_rel.nombre }}</td>
+      <td>{{ actividad.sector or 'No especificado' }}</td>
+      <td>{{ actividad.temas[0].tema if actividad.temas else 'No especificado' }}</td>
+      <td>{{ actividad.nombre }}</td>
+      <td>{{ actividad.email }}</td>
+      <td>{{ actividad.fotos|length }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="pagination">
+  {% if pagination.has_prev %}
+    <a href="{{ url_for('listar_actividades', page=pagination.prev_num) }}">Anterior</a>
+  {% else %}
+    <span class="disabled">Anterior</span>
+  {% endif %}
+  
+  <span>Página {{ pagination.page }} de {{ pagination.pages }}</span>
+  
+  {% if pagination.has_next %}
+    <a href="{{ url_for('listar_actividades', page=pagination.next_num) }}">Siguiente</a>
+  {% else %}
+    <span class="disabled">Siguiente</span>
+  {% endif %}
+</div>
+
+<div id="detalle" style="display: none;">
+  <h2>Detalle de Actividad</h2>
+  <p id="info"></p>
+  <div id="fotos"></div>
+  
+  <!-- Sección de comentarios -->
+  <div class="comentarios-section">
+    <h3>Comentarios</h3>
+    
+    <!-- Formulario para agregar comentario -->
+    <div class="comentario-form">
+      <h4>Agregar Comentario</h4>
+      <div id="comentario-messages"></div>
+      <form id="form-comentario">
+        <label for="comentario-nombre">Nombre: *</label>
+        <input type="text" id="comentario-nombre" minlength="3" maxlength="80" required>
+        
+        <label for="comentario-texto">Comentario: *</label>
+        <textarea id="comentario-texto" rows="4" cols="50" minlength="5" required></textarea>
+        
+        <button type="submit">Agregar comentario</button>
+      </form>
+    </div>
+    
+    <!-- Lista de comentarios -->
+    <div id="lista-comentarios">
+      <h4>Comentarios de la actividad</h4>
+      <div id="comentarios-container">
+        <!-- Los comentarios se cargarán aquí -->
+      </div>
+    </div>
+  </div>
+  
+  <br>
+  <button onclick="volverListado()">Volver al Listado</button>
+</div>
+
+<div id="modal">
+  <div style="text-align:center">
+    <img id="imagen-ampliada" src="" alt="Foto ampliada">
+    <br>
+    <button onclick="cerrarModal()">Cerrar</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let actividadActual = null;
+
+// JavaScript para manejar el detalle de actividades
+document.addEventListener('DOMContentLoaded', function() {
+  const detalleDiv = document.getElementById('detalle');
+  const tableRows = document.querySelectorAll('#tabla-actividades tbody tr');
+  const infoP = document.getElementById('info');
+  const fotosDiv = document.getElementById('fotos');
+  const modal = document.getElementById('modal');
+  const imgAmpliada = document.getElementById('imagen-ampliada');
+  
+  tableRows.forEach(row => {
+    row.addEventListener('click', function() {
+      const actividadId = this.getAttribute('data-id');
+      actividadActual = actividadId;
+      
+      fetch(`/actividad/${actividadId}`)
+        .then(response => response.json())
+        .then(data => {
+          document.querySelector('table').style.display = 'none';
+          document.querySelector('.pagination').style.display = 'none';
+          detalleDiv.style.display = 'block';
+          
+          infoP.innerHTML = `
+            <strong>Nombre:</strong> ${data.nombre}<br>
+            <strong>Inicio:</strong> ${data.inicio}<br>
+            <strong>Término:</strong> ${data.termino || 'No especificado'}<br>
+            <strong>Comuna:</strong> ${data.comuna}<br>
+            <strong>Sector:</strong> ${data.sector || 'No especificado'}<br>
+            <strong>Tema:</strong> ${data.tema}<br>
+            <strong>Organizador:</strong> ${data.email}<br>
+            <strong>Teléfono:</strong> ${data.celular || 'No especificado'}<br>
+            <strong>Descripción:</strong> ${data.descripcion || 'No especificada'}<br>
+            <strong>Total Fotos:</strong> ${data.fotos.length}<br>
+          `;
+          
+          fotosDiv.innerHTML = '';
+          data.fotos.forEach(foto => {
+            const img = document.createElement('img');
+            img.src = foto.ruta;
+            img.className = 'foto-mini';
+            img.addEventListener('click', () => {
+              imgAmpliada.src = foto.ruta;
+              modal.style.display = 'flex';
+            });
+            fotosDiv.appendChild(img);
+          });
+          
+          // Cargar comentarios
+          cargarComentarios(actividadId);
+        });
+    });
+  });
+  
+  // Manejar formulario de comentarios
+  document.getElementById('form-comentario').addEventListener('submit', function(e) {
+    e.preventDefault();
+    agregarComentario();
+  });
+});
+
+function cargarComentarios(actividadId) {
+  fetch(`/api/comentarios/${actividadId}`)
+    .then(response => response.json())
+    .then(comentarios => {
+      const container = document.getElementById('comentarios-container');
+      
+      if (comentarios.length === 0) {
+        container.innerHTML = '<p>No hay comentarios para esta actividad.</p>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      comentarios.forEach(comentario => {
+        const comentarioDiv = document.createElement('div');
+        comentarioDiv.className = 'comentario-item';
+        comentarioDiv.innerHTML = `
+          <div class="comentario-header">
+            ${comentario.nombre}
+            <span class="comentario-fecha">${comentario.fecha}</span>
+          </div>
+          <div class="comentario-texto">${comentario.texto}</div>
+        `;
+        container.appendChild(comentarioDiv);
+      });
+    })
+    .catch(error => {
+      console.error('Error cargando comentarios:', error);
+      document.getElementById('comentarios-container').innerHTML = 
+        '<p>Error cargando comentarios.</p>';
+    });
+}
+
+function agregarComentario() {
+  const nombre = document.getElementById('comentario-nombre').value.trim();
+  const texto = document.getElementById('comentario-texto').value.trim();
+  const messagesDiv = document.getElementById('comentario-messages');
+  
+  // Limpiar mensajes anteriores
+  messagesDiv.innerHTML = '';
+  
+  // Validación en el cliente
+  const errores = [];
+  if (!nombre || nombre.length < 3 || nombre.length > 80) {
+    errores.push('El nombre debe tener entre 3 y 80 caracteres');
+  }
+  if (!texto || texto.length < 5) {
+    errores.push('El comentario debe tener al menos 5 caracteres');
+  }
+  
+  if (errores.length > 0) {
+    messagesDiv.innerHTML = `<div class="error-message">${errores.join('<br>')}</div>`;
+    return;
+  }
+  
+  // Enviar comentario
+  fetch('/api/comentarios', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      nombre: nombre,
+      texto: texto,
+      actividad_id: actividadActual
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Limpiar formulario
+      document.getElementById('comentario-nombre').value = '';
+      document.getElementById('comentario-texto').value = '';
+      
+      // Mostrar mensaje de éxito
+      messagesDiv.innerHTML = '<div class="success-message">Comentario agregado exitosamente</div>';
+      
+      // Recargar comentarios
+      cargarComentarios(actividadActual);
+      
+      // Limpiar mensaje después de 3 segundos
+      setTimeout(() => {
+        messagesDiv.innerHTML = '';
+      }, 3000);
+    } else {
+      messagesDiv.innerHTML = `<div class="error-message">${data.errores.join('<br>')}</div>`;
+    }
+  })
+  .catch(error => {
+    console.error('Error agregando comentario:', error);
+    messagesDiv.innerHTML = '<div class="error-message">Error al agregar comentario</div>';
+  });
+}
+
+function volverListado() {
+  document.getElementById('detalle').style.display = 'none';
+  document.querySelector('table').style.display = 'table';
+  document.querySelector('.pagination').style.display = 'block';
+  actividadActual = null;
+}
+
+function cerrarModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+</script>
+{% endblock %}
